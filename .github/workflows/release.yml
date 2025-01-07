@@ -88,10 +88,10 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           mkdir release
-          cp target/${{ matrix.target }}/release/${{ matrix.artifact_name }} release/
-          cp -r sounds release/
-          cp README.md LICENSE release/
-          Compress-Archive -Path release/* -DestinationPath ${{ matrix.asset_name }}
+          Copy-Item "target\${{ matrix.target }}\release\${{ matrix.artifact_name }}" -Destination "release\"
+          Copy-Item "sounds" -Destination "release\" -Recurse
+          Copy-Item "README.md","LICENSE" -Destination "release\"
+          Compress-Archive -Path "release\*" -DestinationPath "${{ matrix.asset_name }}"
       
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
