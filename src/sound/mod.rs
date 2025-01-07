@@ -6,6 +6,7 @@ use std::time::{Duration, Instant};
 use rand::Rng;
 use std::thread;
 use std::path::PathBuf;
+use std::env;
 
 /// Different types of sounds that can be played
 #[derive(Debug, Clone)]
@@ -38,12 +39,8 @@ impl SoundSystem {
             Ok((stream, stream_handle)) => {
                 let (sender, receiver) = mpsc::channel();
 
-                // Verify sound files exist
-                let sound_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("sounds");
-                if !sound_dir.exists() {
-                    eprintln!("Sound directory not found at: {}", sound_dir.display());
-                    return None;
-                }
+                // Find sound directory
+                let sound_dir = Self::find_sound_directory()?;
 
                 // Check if at least one sound file exists
                 let test_file = sound_dir.join("click1.wav");
@@ -65,6 +62,35 @@ impl SoundSystem {
                 None
             }
         }
+    }
+
+    /// Find the directory containing sound files by checking multiple locations
+    fn find_sound_directory() -> Option<PathBuf> {
+        // Check local directory first (when running from source)
+        let cargo_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("sounds");
+        if cargo_dir.exists() {
+            return Some(cargo_dir);
+        }
+
+        // Check XDG data directory on Unix systems
+        if let Some(home) = env::var_os("HOME") {
+            let xdg_data = PathBuf::from(home).join(".local/share/typewriter/sounds");
+            if xdg_data.exists() {
+                return Some(xdg_data);
+            }
+        }
+
+        // Check relative to the executable
+        if let Ok(exe_path) = env::current_exe() {
+            if let Some(exe_dir) = exe_path.parent() {
+                let exe_sounds = exe_dir.join("sounds");
+                if exe_sounds.exists() {
+                    return Some(exe_sounds);
+                }
+            }
+        }
+
+        None
     }
 
     /// Schedules a sound to be played
