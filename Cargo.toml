@@ -1,0 +1,15 @@
+[package]
+name = "typewriter"
+version = "0.1.0"
+edition = "2021"
+authors = ["Anton Becker <anton.becker@nyu.edu>"]
+description = "A typewriter simulator that provides a more deliberate writing experience"
+
+[dependencies]
+crossterm = "0.27"
+tokio = { version = "1.35", features = ["full"] }
+rodio = "0.17"
+rand = "0.8"
+
+[dev-dependencies]
+tokio-test = "0.4" 
